@@ -1,0 +1,679 @@
+{
+  "info": {
+    "name": "School Attendance REST API (Project Absensi)",
+    "_postman_id": "8f3e5b32-9c42-4f1a-b312-d81234567890",
+    "description": "Comprehensive REST API Collection for Enterprise School Attendance System with Express, MySQL 8+, JWT, RBAC, and Atomic Transactions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacher_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "student_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "parent_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "device_key",
+      "value": "dev_school_scanner_01_secret",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login as Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('admin_token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@absensi.test\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login as Teacher",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('teacher_token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmad@absensi.test\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login as Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set('student_token', jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"budi.siswa@absensi.test\",\n  \"password\": \"password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Student Test\",\n  \"email\": \"new.student@absensi.test\",\n  \"password\": \"password123\",\n  \"role\": \"student\",\n  \"profile\": {\n    \"class_id\": 1,\n    \"nis\": \"NIS-2026-999\",\n    \"gender\": \"male\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Student Attendance (Core Business Logic)",
+      "item": [
+        {
+          "name": "Student Check-In (QR / Scanner)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": 1,\n  \"method\": \"qr\",\n  \"device_id\": 1,\n  \"note\": \"Hadir tepat waktu\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/student-attendances/check-in",
+              "host": ["{{base_url}}"],
+              "path": ["student-attendances", "check-in"]
+            }
+          }
+        },
+        {
+          "name": "Student Check-Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": 1,\n  \"method\": \"qr\",\n  \"device_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/student-attendances/check-out",
+              "host": ["{{base_url}}"],
+              "path": ["student-attendances", "check-out"]
+            }
+          }
+        },
+        {
+          "name": "Manual Attendance Entry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": 2,\n  \"check_in_status\": \"sick\",\n  \"note\": \"Surat dokter terlampir\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/student-attendances/manual",
+              "host": ["{{base_url}}"],
+              "path": ["student-attendances", "manual"]
+            }
+          }
+        },
+        {
+          "name": "Get Today Attendance Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/student-attendances/summary/today",
+              "host": ["{{base_url}}"],
+              "path": ["student-attendances", "summary", "today"]
+            }
+          }
+        },
+        {
+          "name": "List Student Attendances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/student-attendances?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["student-attendances"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Teacher Attendance",
+      "item": [
+        {
+          "name": "Teacher Check-In (Schedule)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teaching_schedule_id\": 1,\n  \"method\": \"qr\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/teacher-attendances/check-in",
+              "host": ["{{base_url}}"],
+              "path": ["teacher-attendances", "check-in"]
+            }
+          }
+        },
+        {
+          "name": "Teacher Check-Out",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{teacher_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teaching_schedule_id\": 1,\n  \"method\": \"qr\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/teacher-attendances/check-out",
+              "host": ["{{base_url}}"],
+              "path": ["teacher-attendances", "check-out"]
+            }
+          }
+        },
+        {
+          "name": "List Teacher Attendances",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/teacher-attendances",
+              "host": ["{{base_url}}"],
+              "path": ["teacher-attendances"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Academic Years",
+      "item": [
+        {
+          "name": "List Academic Years",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/academic-years",
+              "host": ["{{base_url}}"],
+              "path": ["academic-years"]
+            }
+          }
+        },
+        {
+          "name": "Create Academic Year",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2026/2027\",\n  \"start_date\": \"2026-07-15\",\n  \"end_date\": \"2027-06-25\",\n  \"is_active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/academic-years",
+              "host": ["{{base_url}}"],
+              "path": ["academic-years"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Classes",
+      "item": [
+        {
+          "name": "List Classes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/classes",
+              "host": ["{{base_url}}"],
+              "path": ["classes"]
+            }
+          }
+        },
+        {
+          "name": "Create Class",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"academic_year_id\": 1,\n  \"code\": \"X-RPL-1\",\n  \"name\": \"X Rekayasa Perangkat Lunak 1\",\n  \"grade\": \"10\",\n  \"major\": \"RPL\",\n  \"homeroom_teacher_id\": 1,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/classes",
+              "host": ["{{base_url}}"],
+              "path": ["classes"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Students & Parents",
+      "item": [
+        {
+          "name": "List Students",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/students",
+              "host": ["{{base_url}}"],
+              "path": ["students"]
+            }
+          }
+        },
+        {
+          "name": "List Parents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/parents",
+              "host": ["{{base_url}}"],
+              "path": ["parents"]
+            }
+          }
+        },
+        {
+          "name": "Link Student to Parent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": 1,\n  \"relationship\": \"father\",\n  \"is_primary\": true,\n  \"can_view_attendance\": true,\n  \"can_receive_notification\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/parents/1/students",
+              "host": ["{{base_url}}"],
+              "path": ["parents", "1", "students"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Devices & Hardware Ping",
+      "item": [
+        {
+          "name": "List Devices",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/devices",
+              "host": ["{{base_url}}"],
+              "path": ["devices"]
+            }
+          }
+        },
+        {
+          "name": "Device Heartbeat Ping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{device_key}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/devices/1/ping",
+              "host": ["{{base_url}}"],
+              "path": ["devices", "1", "ping"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Notifications & Audit Logs",
+      "item": [
+        {
+          "name": "List Parent Notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/notifications/1/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "1", "read"]
+            }
+          }
+        },
+        {
+          "name": "List Audit Logs (Attendance Events)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/attendance-events?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["attendance-events"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Dashboard Analytics",
+      "item": [
+        {
+          "name": "Get Executive Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/dashboard/summary",
+              "host": ["{{base_url}}"],
+              "path": ["dashboard", "summary"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
