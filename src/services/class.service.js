@@ -1,15 +1,23 @@
 const classRepository = require('../repositories/class.repository');
 const academicYearRepository = require('../repositories/academicYear.repository');
 const teacherRepository = require('../repositories/teacher.repository');
-const { NotFoundError, ConflictError } = require('../utils/appError');
+const { NotFoundError, ConflictError, BadRequestError } = require('../utils/appError');
 
 class ClassService {
   async getAll(query) {
     const { academic_year_id, grade, status, search, page = 1, limit = 20 } = query;
-    const offset = (page - 1) * limit;
+
+    // Validate pagination parameters
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    if (!Number.isInteger(pageNum) || pageNum < 1 || !Number.isInteger(limitNum) || limitNum < 1) {
+      throw new BadRequestError('Invalid pagination parameters');
+    }
+
+    const offset = (pageNum - 1) * limitNum;
 
     const [items, total] = await Promise.all([
-      classRepository.findAll({ academic_year_id, grade, status, search, limit, offset }),
+      classRepository.findAll({ academic_year_id, grade, status, search, limit: limitNum, offset }),
       classRepository.countAll({ academic_year_id, grade, status, search })
     ]);
 

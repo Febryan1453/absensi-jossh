@@ -67,7 +67,16 @@ class ClassRepository {
     }
 
     sql += ' ORDER BY c.grade ASC, c.name ASC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit, 10), parseInt(offset, 10));
+    // Ensure limit and offset are valid integers; fallback to defaults (20,0)
+    const safeLimit = Number.isInteger(parseInt(limit, 10)) && parseInt(limit, 10) > 0 ? parseInt(limit, 10) : 20;
+    const safeOffset = Number.isInteger(parseInt(offset, 10)) && parseInt(offset, 10) >= 0 ? parseInt(offset, 10) : 0;
+    params.push(safeLimit, safeOffset);
+
+    // Development‑only debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('SQL (findAll):', sql);
+      console.log('Params (findAll):', params);
+    }
 
     const [rows] = await conn.execute(sql, params);
     return rows;
