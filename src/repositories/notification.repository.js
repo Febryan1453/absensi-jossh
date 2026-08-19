@@ -22,14 +22,17 @@ class NotificationRepository {
     return rows[0] || null;
   }
 
-  async findAll({ parent_id, student_attendance_id, status, type, limit = 50, offset = 0 } = {}, conn = pool) {
+  async findAll({ parent_id, student_attendance_id, status, type, channel, limit = 50, offset = 0 } = {}, conn = pool) {
     let sql = `
-      SELECT 
+      SELECT
         an.id, an.student_attendance_id, an.parent_id, an.type, an.channel,
-        an.status, an.title, an.message, an.sent_at, an.read_at,
+        an.status, an.title, an.message, an.sent_at, an.read_at, an.error_message,
         an.created_at, an.updated_at,
+        u.name AS parent_name, u.email AS parent_email, p.phone AS parent_phone,
         s.nis AS student_nis, stu_u.name AS student_name
       FROM attendance_notifications an
+      JOIN parents p ON an.parent_id = p.id
+      JOIN users u ON p.user_id = u.id
       JOIN student_attendances sa ON an.student_attendance_id = sa.id
       JOIN students s ON sa.student_id = s.id
       JOIN users stu_u ON s.user_id = stu_u.id
@@ -53,15 +56,27 @@ class NotificationRepository {
       sql += ' AND an.type = ?';
       params.push(type);
     }
+    // The WhatsApp log screen needs only the whatsapp rows. Without this filter
+    // the client had to fetch every channel and filter locally, which also made
+    // meta.total report a number that did not match what was displayed.
+    if (channel) {
+      sql += ' AND an.channel = ?';
+      params.push(channel);
+    }
 
-    sql += ' ORDER BY an.created_at DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit, 10), parseInt(offset, 10));
+    // LIMIT/OFFSET tidak boleh jadi placeholder pada prepared statement
+    // MySQL 8 (mysql2 .execute) - nilainya di-coerce ke integer agar tetap aman.
+    //
+    // an.id breaks ties on created_at: rows sharing a timestamp are otherwise
+    // free to move between pages, so one notification can be listed twice while
+    // another never appears at all.
+    sql += ' ORDER BY an.created_at DESC, an.id DESC LIMIT ' + parseInt(limit, 10) + ' OFFSET ' + parseInt(offset, 10);
 
     const [rows] = await conn.execute(sql, params);
     return rows;
   }
 
-  async countAll({ parent_id, student_attendance_id, status, type } = {}, conn = pool) {
+  async countAll({ parent_id, student_attendance_id, status, type, channel } = {}, conn = pool) {
     let sql = 'SELECT COUNT(*) as total FROM attendance_notifications an WHERE 1=1';
     const params = [];
 
@@ -80,6 +95,13 @@ class NotificationRepository {
     if (type) {
       sql += ' AND an.type = ?';
       params.push(type);
+    }
+    // Must mirror findAll's filters exactly. If the count ignores a filter the
+    // list applies, meta.total reports the whole table while the page shows a
+    // subset -- pagination then invents pages that render empty.
+    if (channel) {
+      sql += ' AND an.channel = ?';
+      params.push(channel);
     }
 
     const [rows] = await conn.execute(sql, params);

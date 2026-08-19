@@ -141,8 +141,9 @@ class UserRepository {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    sql += ' ORDER BY id DESC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit, 10), parseInt(offset, 10));
+    // LIMIT/OFFSET tidak boleh jadi placeholder pada prepared statement
+    // MySQL 8 (mysql2 .execute) - nilainya di-coerce ke integer agar tetap aman.
+    sql += ' ORDER BY id DESC LIMIT ' + parseInt(limit, 10) + ' OFFSET ' + parseInt(offset, 10);
 
     const [rows] = await conn.execute(sql, params);
     return rows;

@@ -26,8 +26,11 @@ class RoomRepository {
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
 
-    sql += ' ORDER BY name ASC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit, 10), parseInt(offset, 10));
+    // LIMIT/OFFSET tidak boleh jadi placeholder pada prepared statement
+    // MySQL 8 (mysql2 .execute) - nilainya di-coerce ke integer agar tetap aman.
+    // Deterministic tie-breaker on the primary key: without it MySQL may repeat
+    // or skip rows whose sort keys are equal when LIMIT/OFFSET spans pages.
+    sql += ' ORDER BY name ASC, id ASC LIMIT ' + parseInt(limit, 10) + ' OFFSET ' + parseInt(offset, 10);
 
     const [rows] = await conn.execute(sql, params);
     return rows;

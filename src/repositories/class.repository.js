@@ -66,13 +66,23 @@ class ClassRepository {
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    sql += ' ORDER BY c.grade ASC, c.name ASC LIMIT ? OFFSET ?';
-    // Ensure limit and offset are valid integers; fallback to defaults (20,0)
+    // Guard the paging values before they reach the SQL. parseInt alone still
+    // lets through NaN (?limit=abc) and negatives, which MySQL rejects.
     const safeLimit = Number.isInteger(parseInt(limit, 10)) && parseInt(limit, 10) > 0 ? parseInt(limit, 10) : 20;
     const safeOffset = Number.isInteger(parseInt(offset, 10)) && parseInt(offset, 10) >= 0 ? parseInt(offset, 10) : 0;
-    params.push(safeLimit, safeOffset);
 
-    // Development‑only debug logging
+    // LIMIT/OFFSET are inlined rather than bound. mysql2's .execute() prepares
+    // the statement, and MySQL 8 refuses placeholders there whatever the
+    // JavaScript type -- passing an integer fails exactly like passing a
+    // string, with ER_WRONG_ARGUMENTS. Inlining is safe here because both
+    // values are already integers by the lines above.
+    //
+    // c.id is a deterministic tie-breaker: grade+name is not a total order, so
+    // without it MySQL may repeat or skip classes whose sort keys are equal
+    // once the result spans more than one page.
+    sql += ' ORDER BY c.grade ASC, c.name ASC, c.id ASC LIMIT ' + safeLimit + ' OFFSET ' + safeOffset;
+
+    // Development-only debug logging
     if (process.env.NODE_ENV === 'development') {
       console.log('SQL (findAll):', sql);
       console.log('Params (findAll):', params);
