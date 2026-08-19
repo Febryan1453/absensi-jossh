@@ -634,6 +634,16 @@ CREATE TABLE attendance_devices (
         code
     ),
 
+    -- api_key must be unique: deviceAuth.middleware.js resolves a device by
+    -- `WHERE api_key = ? LIMIT 1` with no ORDER BY, so two devices sharing a
+    -- key would let the server silently pick either one. A gate tablet could
+    -- then record attendance against the wrong gate, with numbers that still
+    -- look plausible. NULL is still allowed for devices without a key --
+    -- MySQL permits multiple NULLs in a UNIQUE index.
+    UNIQUE KEY uq_device_api_key (
+        api_key
+    ),
+
     INDEX idx_device_status (
         status
     ),

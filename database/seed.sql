@@ -43,7 +43,7 @@ TRUNCATE TABLE users;
 -- password
 --
 -- bcrypt hash:
--- $2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E
+-- $2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS
 -- ============================================================
 
 
@@ -68,7 +68,7 @@ VALUES
     UUID(),
     'Administrator',
     'admin@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'admin',
     'active',
     NOW()
@@ -79,7 +79,7 @@ VALUES
     UUID(),
     'Ahmad Fauzi',
     'ahmad@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'teacher',
     'active',
     NOW()
@@ -89,7 +89,7 @@ VALUES
     UUID(),
     'Budi Santoso',
     'budi.guru@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'teacher',
     'active',
     NOW()
@@ -99,7 +99,7 @@ VALUES
     UUID(),
     'Citra Lestari',
     'citra@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'teacher',
     'active',
     NOW()
@@ -110,7 +110,7 @@ VALUES
     UUID(),
     'Ahmad Hidayat',
     'ayah.budi@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -120,7 +120,7 @@ VALUES
     UUID(),
     'Siti Aminah',
     'ibu.budi@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -130,7 +130,7 @@ VALUES
     UUID(),
     'Dedi Kurniawan',
     'ayah.andi@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -140,7 +140,7 @@ VALUES
     UUID(),
     'Rina Marlina',
     'ibu.andi@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -150,7 +150,7 @@ VALUES
     UUID(),
     'Eko Prasetyo',
     'ayah.dimas@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -160,7 +160,7 @@ VALUES
     UUID(),
     'Dewi Lestari',
     'ibu.dimas@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -170,7 +170,7 @@ VALUES
     UUID(),
     'Fajar Nugroho',
     'ayah.fajar@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -180,7 +180,7 @@ VALUES
     UUID(),
     'Novi Anggraini',
     'ibu.fajar@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'parent',
     'active',
     NOW()
@@ -191,7 +191,7 @@ VALUES
     UUID(),
     'Budi Hidayat',
     'budi.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -201,7 +201,7 @@ VALUES
     UUID(),
     'Andi Kurniawan',
     'andi.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -211,7 +211,7 @@ VALUES
     UUID(),
     'Dimas Prasetyo',
     'dimas.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -221,7 +221,7 @@ VALUES
     UUID(),
     'Fajar Nugraha',
     'fajar.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -231,7 +231,7 @@ VALUES
     UUID(),
     'Rizky Ramadhan',
     'rizky.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -241,7 +241,7 @@ VALUES
     UUID(),
     'Muhammad Ilham',
     'ilham.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -251,7 +251,7 @@ VALUES
     UUID(),
     'Salsa Putri',
     'salsa.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -261,7 +261,7 @@ VALUES
     UUID(),
     'Aulia Rahma',
     'aulia.siswa@absensi.test',
-    '$2y$12$LQv3c1yqBWqQ5w5eJ8w7Ue9zM3kG9hN5W5H5x6r7y8z9A0B1C2D3E',
+    '$2a$12$GOKLZVoYouWNzdJPn14KU.VT2h8E/rZWqMxnuFggPqMwQCY8Cs0SS',
     'student',
     'active',
     NOW()
@@ -989,8 +989,8 @@ VALUES
     (SELECT id FROM students WHERE nis = '20260001'),
     (SELECT id FROM school_sessions WHERE name = 'Jam Sekolah Reguler'),
     '2026-08-18',
-    '2026-08-18 06:58:12',
-    '2026-08-18 15:32:10',
+    '2026-08-17 23:58:12',
+    '2026-08-18 08:32:10',
     'present',
     'completed',
     'qr',
@@ -1005,8 +1005,8 @@ VALUES
     (SELECT id FROM students WHERE nis = '20260002'),
     (SELECT id FROM school_sessions WHERE name = 'Jam Sekolah Reguler'),
     '2026-08-18',
-    '2026-08-18 07:24:31',
-    '2026-08-18 15:35:12',
+    '2026-08-18 00:24:31',
+    '2026-08-18 08:35:12',
     'late',
     'completed',
     'qr',
@@ -1021,8 +1021,8 @@ VALUES
     (SELECT id FROM students WHERE nis = '20260003'),
     (SELECT id FROM school_sessions WHERE name = 'Jam Sekolah Reguler'),
     '2026-08-18',
-    '2026-08-18 07:02:44',
-    '2026-08-18 15:28:42',
+    '2026-08-18 00:02:44',
+    '2026-08-18 08:28:42',
     'present',
     'completed',
     'qr',
@@ -1037,8 +1037,8 @@ VALUES
     (SELECT id FROM students WHERE nis = '20260004'),
     (SELECT id FROM school_sessions WHERE name = 'Jam Sekolah Reguler'),
     '2026-08-18',
-    '2026-08-18 07:31:22',
-    '2026-08-18 14:20:10',
+    '2026-08-18 00:31:22',
+    '2026-08-18 07:20:10',
     'late',
     'early_leave',
     'qr',
@@ -1053,8 +1053,8 @@ VALUES
     (SELECT id FROM students WHERE nis = '20260005'),
     (SELECT id FROM school_sessions WHERE name = 'Jam Sekolah Reguler'),
     '2026-08-18',
-    '2026-08-18 06:55:21',
-    '2026-08-18 15:31:05',
+    '2026-08-17 23:55:21',
+    '2026-08-18 08:31:05',
     'present',
     'completed',
     'qr',
@@ -1095,8 +1095,8 @@ VALUES
         LIMIT 1
     ),
     (SELECT id FROM teachers WHERE nip = '198501012010011001'),
-    '2026-08-18 07:52:10',
-    '2026-08-18 09:35:00',
+    '2026-08-18 00:52:10',
+    '2026-08-18 02:35:00',
     'on_time',
     'qr',
     (SELECT id FROM attendance_devices WHERE code = 'GATE-01'),
@@ -1116,8 +1116,8 @@ VALUES
         LIMIT 1
     ),
     (SELECT id FROM teachers WHERE nip = '198703152012021002'),
-    '2026-08-18 10:07:21',
-    '2026-08-18 11:35:00',
+    '2026-08-18 03:07:21',
+    '2026-08-18 04:35:00',
     'late',
     'qr',
     (SELECT id FROM attendance_devices WHERE code = 'GATE-01'),
@@ -1137,8 +1137,8 @@ VALUES
         LIMIT 1
     ),
     (SELECT id FROM teachers WHERE nip = '199002202015032003'),
-    '2026-08-18 07:55:00',
-    '2026-08-18 09:32:00',
+    '2026-08-18 00:55:00',
+    '2026-08-18 02:32:00',
     'on_time',
     'qr',
     (SELECT id FROM attendance_devices WHERE code = 'GATE-02'),
@@ -1192,7 +1192,7 @@ VALUES
 
     (SELECT id FROM attendance_devices WHERE code = 'GATE-01'),
 
-    '2026-08-18 06:58:12',
+    '2026-08-17 23:58:12',
 
     'qr',
 
@@ -1233,7 +1233,7 @@ VALUES
 
     (SELECT id FROM attendance_devices WHERE code = 'GATE-01'),
 
-    '2026-08-18 15:32:10',
+    '2026-08-18 08:32:10',
 
     'qr',
 
@@ -1274,7 +1274,7 @@ VALUES
 
     (SELECT id FROM attendance_devices WHERE code = 'GATE-01'),
 
-    '2026-08-18 07:24:31',
+    '2026-08-18 00:24:31',
 
     'qr',
 
@@ -1333,7 +1333,7 @@ VALUES
     'read',
     'Kehadiran Budi',
     'Budi telah melakukan absensi masuk pada pukul 06:58.',
-    '2026-08-18 06:59:00'
+    '2026-08-17 23:59:00'
 ),
 
 -- Andi terlambat
@@ -1362,7 +1362,7 @@ VALUES
     'sent',
     'Andi Terlambat',
     'Andi melakukan absensi masuk pada pukul 07:24 dan tercatat terlambat.',
-    '2026-08-18 07:25:00'
+    '2026-08-18 00:25:00'
 );
 
 
