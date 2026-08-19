@@ -4,7 +4,7 @@ const { NotFoundError, ForbiddenError } = require('../utils/appError');
 
 class NotificationService {
   async getAll(query, currentUser) {
-    const { student_attendance_id, status, type, page = 1, limit = 20 } = query;
+    const { student_attendance_id, status, type, channel, page = 1, limit = 20 } = query;
     const offset = (page - 1) * limit;
 
     let targetParentId = query.parent_id;
@@ -21,6 +21,7 @@ class NotificationService {
         student_attendance_id,
         status,
         type,
+        channel,
         limit,
         offset
       }),
@@ -28,7 +29,8 @@ class NotificationService {
         parent_id: targetParentId,
         student_attendance_id,
         status,
-        type
+        type,
+        channel
       }),
       targetParentId ? notificationRepository.countUnreadByParent(targetParentId) : 0
     ]);
