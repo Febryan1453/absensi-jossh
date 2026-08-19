@@ -1,3 +1,8 @@
+// NOTE: `role` is supplied by the caller because an administrator legitimately
+// needs to choose which kind of account is being created (admin, teacher,
+// student, parent). It is only safe to trust it because POST /auth/register is
+// gated behind authenticateToken + requireRole('admin') in auth.routes.js.
+// The enum below stays as the second line of defence against arbitrary values.
 const registerSchema = {
   body: {
     name: { type: 'string', required: true, minLength: 2, maxLength: 150 },

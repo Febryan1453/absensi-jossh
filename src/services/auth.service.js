@@ -11,6 +11,8 @@ const { BadRequestError, UnauthorizedError, ConflictError, NotFoundError } = req
 class AuthService {
   /**
    * Register a new user with optional role-specific profile in an atomic transaction
+   * Caller must be an authenticated admin (enforced on the route), so `role` is
+   * trusted here. The fallback stays 'student', the least privileged role.
    */
   async register(data) {
     const { name, email, password, role = 'student', profile = {} } = data;

@@ -335,10 +335,19 @@ Output console yang diharapkan saat server berhasil berjalan:
    ```
 5. Middleware `authenticateToken` memverifikasi token dan masa berlakunya.
 
+### Pembuatan Akun (Account Provisioning):
+Tidak ada self-service registration. `POST /api/v1/auth/register` **bukan endpoint publik**:
+route ini dilindungi `authenticateToken` + `requireRole('admin')`, sehingga hanya admin yang
+sudah login yang bisa membuat akun baru. Field `role` pada body memang menentukan role akun
+yang dibuat (`admin` / `teacher` / `student` / `parent`), dan itu aman karena hanya admin yang
+dapat mencapai endpoint tersebut. Request tanpa token dijawab `401`, request dengan token
+non-admin dijawab `403`.
+
 ### Role Authorization Matrix:
 | Resource / Action | Admin | Teacher | Student | Parent | Device Key |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| Auth Register / Login / Me | ✅ | ✅ | ✅ | ✅ | - |
+| Auth Login / Me / Change Password | ✅ | ✅ | ✅ | ✅ | - |
+| Auth Register (pembuatan akun baru) | ✅ | ❌ | ❌ | ❌ | - |
 | Academic Years & Classes CRUD | ✅ | ❌ | ❌ | ❌ | - |
 | Teachers & Students CRUD | ✅ | ❌ | ❌ | ❌ | - |
 | Teaching Schedules CRUD | ✅ | ❌ | ❌ | ❌ | - |
@@ -378,7 +387,7 @@ Semua endpoint diawali dengan prefix: `/api/v1`
 ### 2. Authentication (`/auth`)
 | Method | Endpoint | Deskripsi | Auth |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/auth/register` | Mendaftarkan akun user baru (+ profil role) | Public |
+| `POST` | `/auth/register` | Membuat akun user baru (+ profil role) | Admin |
 | `POST` | `/auth/login` | Login user & mendapatkan token JWT | Public |
 | `GET` | `/auth/me` | Mengambil data profil user yang login | Bearer Token |
 | `PUT` | `/auth/change-password` | Mengganti password user yang login | Bearer Token |
