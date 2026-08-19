@@ -38,6 +38,28 @@ class DeviceController {
     }
   }
 
+  /**
+   * Returns the gate credential. Separate route, separate name, so that a
+   * search for who can read a device key has exactly two answers.
+   */
+  async revealKey(req, res, next) {
+    try {
+      const result = await deviceService.revealKey(req.params.id);
+      return ApiResponse.success(res, 200, 'Device pairing key retrieved successfully', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async rotateKey(req, res, next) {
+    try {
+      const result = await deviceService.rotateKey(req.params.id);
+      return ApiResponse.success(res, 200, 'Device key rotated successfully', result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async delete(req, res, next) {
     try {
       await deviceService.delete(req.params.id);
