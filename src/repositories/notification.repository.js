@@ -148,6 +148,40 @@ class NotificationRepository {
     return affected;
   }
 
+  /**
+   * Update delivery state after a gateway attempt.
+   *
+   * Only the fields actually passed are written, so a retry that fails does
+   * not wipe the sent_at of an earlier success, and a success clears the
+   * previous error instead of leaving a stale reason on a delivered message.
+   */
+  async update(id, { status, sent_at, error_message } = {}, conn = pool) {
+    const fields = [];
+    const params = [];
+
+    if (status !== undefined) {
+      fields.push('status = ?');
+      params.push(status);
+    }
+    if (sent_at !== undefined) {
+      fields.push('sent_at = ?');
+      params.push(sent_at);
+    }
+    if (error_message !== undefined) {
+      fields.push('error_message = ?');
+      params.push(error_message);
+    }
+
+    if (fields.length === 0) return false;
+
+    params.push(id);
+    const [result] = await conn.execute(
+      `UPDATE attendance_notifications SET ${fields.join(', ')} WHERE id = ?`,
+      params
+    );
+    return result.affectedRows > 0;
+  }
+
   async markAsRead(id, conn = pool) {
     const sql = "UPDATE attendance_notifications SET status = 'read', read_at = NOW() WHERE id = ?";
     const [result] = await conn.execute(sql, [id]);

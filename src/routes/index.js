@@ -15,6 +15,7 @@ const teacherAttendanceRoutes = require('./teacherAttendance.routes');
 const attendanceEventRoutes = require('./attendanceEvent.routes');
 const notificationRoutes = require('./notification.routes');
 const dashboardRoutes = require('./dashboard.routes');
+const whatsappRoutes = require('./whatsapp.routes');
 
 const router = express.Router();
 
@@ -38,6 +39,7 @@ router.use('/subjects', subjectRoutes);
 router.use('/rooms', roomRoutes);
 router.use('/school-sessions', schoolSessionRoutes);
 router.use('/devices', deviceRoutes);
+router.use('/whatsapp', whatsappRoutes);
 router.use('/teaching-schedules', teachingScheduleRoutes);
 router.use('/student-attendances', studentAttendanceRoutes);
 router.use('/teacher-attendances', teacherAttendanceRoutes);

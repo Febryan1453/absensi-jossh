@@ -3,6 +3,7 @@ const studentRepository = require('../repositories/student.repository');
 const schoolSessionRepository = require('../repositories/schoolSession.repository');
 const attendanceEventRepository = require('../repositories/attendanceEvent.repository');
 const notificationRepository = require('../repositories/notification.repository');
+const whatsappService = require('./whatsapp.service');
 const studentParentRepository = require('../repositories/studentParent.repository');
 const { withTransaction } = require('../config/database');
 const { NotFoundError, BadRequestError, ConflictError, ForbiddenError } = require('../utils/appError');
@@ -91,6 +92,8 @@ class StudentAttendanceService {
    * Process student check-in within an atomic MySQL transaction
    */
   async checkIn(data, context = {}) {
+    // Diisi di dalam transaksi, dikirim sesudah commit.
+    const pendingWhatsapp = [];
     const { student_id, nis, method = 'qr', device_id, note, ip_address, user_agent, latitude, longitude } = data;
 
     // Resolve student record
@@ -196,12 +199,17 @@ class StudentAttendanceService {
         ? `Siswa ${student.name} (${student.nis}) tercatat MASUK TERLAMBAT pada pukul ${currentTime}.`
         : `Siswa ${student.name} (${student.nis}) telah MASUK sekolah pada pukul ${currentTime} dan hadir tepat waktu.`;
 
+      const notificationType = checkInStatus === 'late' ? 'late' : 'check_in';
+
       for (const parent of parentLinks) {
+        // In-app notification. Always recorded, regardless of the WhatsApp
+        // gateway: the parent portal must show the event even when the message
+        // could not be delivered.
         await notificationRepository.create(
           {
             student_attendance_id: recordId,
             parent_id: parent.parent_id,
-            type: checkInStatus === 'late' ? 'late' : 'check_in',
+            type: notificationType,
             channel: 'web',
             status: 'sent',
             title: notificationTitle,
@@ -210,10 +218,42 @@ class StudentAttendanceService {
           },
           conn
         );
+
+        // WhatsApp row, queued as pending and dispatched after the transaction
+        // commits. Two reasons it is not sent inside the transaction: a
+        // gateway call would hold the row locks open for the length of an
+        // external HTTP request, and an attendance record must never be rolled
+        // back because a message failed. The child was present either way.
+        pendingWhatsapp.push({
+          parent,
+          row: {
+            student_attendance_id: recordId,
+            parent_id: parent.parent_id,
+            type: notificationType,
+            channel: 'whatsapp',
+            status: 'pending',
+            title: notificationTitle,
+            message: notificationMessage
+          },
+          vars: {
+            nama_siswa: student.name,
+            kelas: student.class_name ?? '',
+            jam: currentTime,
+            tanggal: todayDate,
+            status: checkInStatus === 'late' ? 'Terlambat' : 'Hadir',
+            nama_wali: parent.parent_name ?? ''
+          }
+        });
       }
 
       return recordId;
     });
+
+    // Fire-and-forget on purpose. A gateway that is slow or down must not delay
+    // the gate: the tablet needs its answer in milliseconds while a queue of
+    // students waits behind the scanner. Delivery outcome is recorded on the
+    // notification row and surfaced in the WhatsApp log.
+    void dispatchWhatsappQueue(pendingWhatsapp);
 
     return studentAttendanceRepository.findById(attendanceId);
   }
@@ -421,6 +461,42 @@ class StudentAttendanceService {
     const date = query.date || getCurrentDate();
     const classId = query.class_id || null;
     return studentAttendanceRepository.getSummaryStats({ date, class_id: classId });
+  }
+}
+
+
+/**
+ * Persist and dispatch queued WhatsApp notifications.
+ *
+ * Never throws: it runs outside the request/response cycle, so an unhandled
+ * rejection here would take the process down rather than fail one message.
+ * Every outcome is written onto the notification row instead.
+ */
+async function dispatchWhatsappQueue(queue) {
+  if (!queue || queue.length === 0) return;
+
+  try {
+    const settings = await whatsappService.getSettingsInternal();
+
+    // Skip the work entirely when this event type is switched off, rather than
+    // storing rows that would never be sent and would clutter the log.
+    const type = queue[0].row.type;
+    if (!settings.is_active || !whatsappService.isEnabledFor(settings, type)) return;
+
+    for (const item of queue) {
+      const id = await notificationRepository.create(item.row);
+      const stored = await notificationRepository.findById(id);
+      if (!stored) continue;
+
+      await whatsappService.dispatch(stored, {
+        settings,
+        target: item.parent.phone,
+        vars: item.vars
+      });
+    }
+  } catch (error) {
+    // Logged, not rethrown. Attendance is already committed and correct.
+    console.error('[whatsapp] gagal mengirim antrean notifikasi:', error.message);
   }
 }
 

@@ -30,6 +30,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- DROP TABLES
 -- ============================================================
 
+DROP TABLE IF EXISTS whatsapp_templates;
+DROP TABLE IF EXISTS whatsapp_settings;
 DROP TABLE IF EXISTS attendance_notifications;
 DROP TABLE IF EXISTS attendance_events;
 DROP TABLE IF EXISTS teacher_attendances;
@@ -1168,6 +1170,128 @@ CREATE TABLE attendance_notifications (
 
     INDEX idx_notification_created (
         created_at
+    )
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- 18. WHATSAPP SETTINGS
+-- Satu baris konfigurasi gateway WhatsApp untuk seluruh sekolah
+-- ============================================================
+--
+-- Provider values are stored lowercase to match every other ENUM in this
+-- schema. The public API contract spells them FONNTE / WABLAS / META_CLOUD,
+-- so the service layer uppercases on read and the repository lowercases on
+-- write -- see src/repositories/whatsappSetting.repository.js.
+--
+-- api_key holds the raw gateway token because the sender needs the real value.
+-- It must NEVER be returned by any endpoint: mask it in the service layer.
+-- ============================================================
+
+CREATE TABLE whatsapp_settings (
+    -- Pinned to 1: this table is a singleton. The primary key blocks a second
+    -- INSERT and the CHECK blocks anyone from steering around it with id = 2,
+    -- so "the settings" is always one unambiguous row.
+    id TINYINT UNSIGNED NOT NULL DEFAULT 1 PRIMARY KEY,
+
+    is_active BOOLEAN NOT NULL DEFAULT FALSE,
+
+    provider ENUM(
+        'fonnte',
+        'wablas',
+        'meta_cloud'
+    ) NOT NULL DEFAULT 'fonnte',
+
+    base_url VARCHAR(255) NOT NULL DEFAULT 'https://api.fonnte.com',
+
+    -- Stored as given; masked before it leaves the API.
+    api_key VARCHAR(255) NOT NULL DEFAULT '',
+
+    -- Nomor perangkat pengirim, samakan panjangnya dengan users.phone
+    sender VARCHAR(30) NOT NULL DEFAULT '',
+
+    send_on_arrival BOOLEAN NOT NULL DEFAULT TRUE,
+
+    send_on_late BOOLEAN NOT NULL DEFAULT TRUE,
+
+    send_on_departure BOOLEAN NOT NULL DEFAULT FALSE,
+
+    send_on_absent BOOLEAN NOT NULL DEFAULT TRUE,
+
+    -- Pesan yang jatuh di dalam rentang ini ditahan sampai jam tenang berakhir
+    quiet_hours_start TIME NOT NULL DEFAULT '21:00:00',
+
+    quiet_hours_end TIME NOT NULL DEFAULT '05:30:00',
+
+    -- DEFAULT TRUE is a safety interlock, not a preference. A fresh install
+    -- logs messages instead of sending them, so nobody's parents receive a
+    -- test blast before an admin deliberately turns simulation off.
+    simulation_mode BOOLEAN NOT NULL DEFAULT TRUE,
+
+    max_attempts TINYINT UNSIGNED NOT NULL DEFAULT 3,
+
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_whatsapp_setting_singleton
+        CHECK (id = 1),
+
+    CONSTRAINT chk_whatsapp_setting_max_attempts
+        CHECK (max_attempts BETWEEN 1 AND 10)
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = utf8mb4
+COLLATE = utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- 19. WHATSAPP TEMPLATES
+-- Satu baris per jenis pesan
+-- ============================================================
+--
+-- template_key is an ENUM rather than a free VARCHAR: the six keys are fixed
+-- by the frontend contract, and a typo in an upsert would otherwise create a
+-- seventh template that nothing ever reads.
+--
+-- Kolom dinamai template_key, bukan `key`, karena KEY adalah kata kunci MySQL.
+-- ============================================================
+
+CREATE TABLE whatsapp_templates (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    template_key ENUM(
+        'siswa_datang',
+        'siswa_terlambat',
+        'siswa_pulang',
+        'siswa_alpa',
+        'ringkasan_wali_kelas',
+        'izin_disetujui'
+    ) NOT NULL,
+
+    name VARCHAR(100) NOT NULL,
+
+    -- Variabel yang boleh dipakai di dalam body:
+    -- {nama_siswa} {kelas} {jam} {tanggal} {status} {nama_sekolah} {nama_wali}
+    body TEXT NOT NULL,
+
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_whatsapp_template_key (
+        template_key
+    ),
+
+    INDEX idx_whatsapp_template_active (
+        is_active
     )
 )
 ENGINE = InnoDB

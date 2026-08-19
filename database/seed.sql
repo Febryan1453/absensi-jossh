@@ -18,6 +18,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- CLEAN EXISTING DATA
 -- ============================================================
 
+TRUNCATE TABLE whatsapp_templates;
+TRUNCATE TABLE whatsapp_settings;
 TRUNCATE TABLE attendance_notifications;
 TRUNCATE TABLE attendance_events;
 TRUNCATE TABLE teacher_attendances;
@@ -1367,6 +1369,122 @@ VALUES
 
 
 -- ============================================================
+-- 17. WHATSAPP SETTINGS
+-- ============================================================
+-- Baris bawaan sengaja dibuat "mati":
+--   is_active       = FALSE  -> tidak ada notifikasi yang dipicu
+--   simulation_mode = TRUE   -> kalaupun dinyalakan, pesan hanya dicatat
+--   api_key         = ''     -> token gateway diisi lewat layar Pengaturan
+--
+-- JANGAN pernah menuliskan token Fonnte yang asli di berkas ini. Berkas ini
+-- ikut ter-commit; tokennya hanya boleh hidup di backend/.env dan di kolom
+-- api_key pada database yang berjalan.
+-- ============================================================
+
+INSERT INTO whatsapp_settings
+(
+    id,
+    is_active,
+    provider,
+    base_url,
+    api_key,
+    sender,
+    send_on_arrival,
+    send_on_late,
+    send_on_departure,
+    send_on_absent,
+    quiet_hours_start,
+    quiet_hours_end,
+    simulation_mode,
+    max_attempts
+)
+VALUES
+(
+    1,
+    FALSE,
+    'fonnte',
+    'https://api.fonnte.com',
+    '',
+    '',
+    TRUE,
+    TRUE,
+    FALSE,
+    TRUE,
+    '21:00:00',
+    '05:30:00',
+    TRUE,
+    3
+);
+
+
+-- ============================================================
+-- 18. WHATSAPP TEMPLATES
+-- ============================================================
+-- {nama_wali} = penerima pesan ini: wali murid pada template siswa, wali
+-- kelas pada template ringkasan. Jadi sapaan di awal selalu benar.
+--
+-- *tebal* dan _miring_ adalah format WhatsApp, bukan salah ketik.
+-- ============================================================
+
+INSERT INTO whatsapp_templates
+(
+    template_key,
+    name,
+    body,
+    is_active
+)
+VALUES
+
+-- Siswa datang tepat waktu
+(
+    'siswa_datang',
+    'Siswa datang tepat waktu',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nAnanda *{nama_siswa}* ({kelas}) sudah tiba di sekolah pada {tanggal} pukul {jam}.\n\nTerima kasih atas perhatian Bapak/Ibu.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+),
+
+-- Siswa datang terlambat
+(
+    'siswa_terlambat',
+    'Siswa datang terlambat',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nAnanda *{nama_siswa}* ({kelas}) tiba di sekolah pada {tanggal} pukul {jam} dan tercatat *{status}*.\n\nMohon bantuan Bapak/Ibu agar ananda dapat berangkat lebih awal. Terima kasih.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+),
+
+-- Siswa pulang
+(
+    'siswa_pulang',
+    'Siswa pulang',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nAnanda *{nama_siswa}* ({kelas}) telah meninggalkan sekolah pada {tanggal} pukul {jam}.\n\nMohon dipastikan ananda tiba di rumah dengan selamat.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+),
+
+-- Siswa tidak hadir tanpa keterangan
+(
+    'siswa_alpa',
+    'Siswa tidak hadir tanpa keterangan',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nSampai pukul {jam} pada {tanggal}, ananda *{nama_siswa}* ({kelas}) belum tercatat hadir dan berstatus *{status}*.\n\nMohon konfirmasi Bapak/Ibu kepada wali kelas. Terima kasih.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+),
+
+-- Ringkasan harian untuk wali kelas
+(
+    'ringkasan_wali_kelas',
+    'Ringkasan harian untuk wali kelas',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nRekap kehadiran kelas {kelas} pada {tanggal}, per pukul {jam}:\n\n{status}\n\nMohon diperiksa dan ditindaklanjuti bila ada koreksi.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+),
+
+-- Pengajuan izin disetujui
+(
+    'izin_disetujui',
+    'Pengajuan izin disetujui',
+    '*{nama_sekolah}*\n\nYth. Bapak/Ibu {nama_wali},\nPengajuan izin untuk ananda *{nama_siswa}* ({kelas}) pada {tanggal} telah *disetujui*. Kehadiran ananda hari itu dicatat sebagai *{status}* sejak pukul {jam}.\n\nTerima kasih atas konfirmasi Bapak/Ibu.\n_Pesan otomatis, mohon tidak dibalas._',
+    TRUE
+);
+
+
+-- ============================================================
 -- FINISH
 -- ============================================================
 
@@ -1448,4 +1566,14 @@ FROM attendance_events
 UNION ALL
 
 SELECT 'attendance_notifications', COUNT(*)
-FROM attendance_notifications;
+FROM attendance_notifications
+
+UNION ALL
+
+SELECT 'whatsapp_settings', COUNT(*)
+FROM whatsapp_settings
+
+UNION ALL
+
+SELECT 'whatsapp_templates', COUNT(*)
+FROM whatsapp_templates;
