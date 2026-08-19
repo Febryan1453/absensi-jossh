@@ -1,5 +1,6 @@
 const express = require('express');
 const authRoutes = require('./auth.routes');
+const userRoutes = require('./user.routes');
 const academicYearRoutes = require('./academicYear.routes');
 const classRoutes = require('./class.routes');
 const teacherRoutes = require('./teacher.routes');
@@ -30,6 +31,7 @@ router.get('/health', (req, res) => {
 
 // Resource Routers
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 router.use('/academic-years', academicYearRoutes);
 router.use('/classes', classRoutes);
 router.use('/teachers', teacherRoutes);

@@ -1,5 +1,25 @@
 const { pool } = require('../config/database');
 
+const ROLES = ['admin', 'teacher', 'student', 'parent'];
+
+/**
+ * Accept either a single role or a comma separated list ('admin,teacher').
+ *
+ * Staff administration needs administrators and teachers in one list; asking
+ * the caller to make two paginated requests and merge them would give a page
+ * count that is wrong on every page.
+ *
+ * Values are checked against the enum rather than passed through. They already
+ * travel as bound parameters, but the list is also interpolated into the IN
+ * clause as placeholders, and a filter that silently accepts unknown roles
+ * returns an empty list with no indication of why.
+ */
+function normalizeRoles(role) {
+  if (!role) return [];
+  const raw = Array.isArray(role) ? role : String(role).split(',');
+  return raw.map((r) => String(r).trim().toLowerCase()).filter((r) => ROLES.includes(r));
+}
+
 class UserRepository {
   /**
    * Find user by ID
@@ -128,9 +148,10 @@ class UserRepository {
     `;
     const params = [];
 
-    if (role) {
-      sql += ' AND role = ?';
-      params.push(role);
+    const roles = normalizeRoles(role);
+    if (roles.length) {
+      sql += ` AND role IN (${roles.map(() => '?').join(', ')})`;
+      params.push(...roles);
     }
     if (status) {
       sql += ' AND status = ?';
@@ -156,9 +177,10 @@ class UserRepository {
     let sql = 'SELECT COUNT(*) as total FROM users WHERE 1=1';
     const params = [];
 
-    if (role) {
-      sql += ' AND role = ?';
-      params.push(role);
+    const roles = normalizeRoles(role);
+    if (roles.length) {
+      sql += ` AND role IN (${roles.map(() => '?').join(', ')})`;
+      params.push(...roles);
     }
     if (status) {
       sql += ' AND status = ?';
