@@ -13,6 +13,20 @@ const pool = mysql.createPool({
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
   queueLimit: 0,
   charset: 'utf8mb4',
+  /**
+   * KONVENSI WAKTU: setiap DATETIME di basis data ini adalah UTC.
+   *
+   * mysql2 memakai setelan ini untuk dua arah — mengubah objek Date menjadi
+   * UTC saat menulis, dan menafsirkan DATETIME sebagai UTC saat membaca. Maka
+   * waktu HARUS ditulis sebagai objek Date yang diikat sebagai parameter.
+   *
+   * JANGAN memakai NOW(). NOW() dihitung MySQL pada zona waktu sesi, bukan
+   * lewat mysql2, sehingga ia menulis jam dinding server ke kolom yang nanti
+   * dibaca kembali seolah UTC. Di server berzona WIB nilainya lalu tampil
+   * tujuh jam di masa depan — dan itu tidak pernah terlihat sebagai error,
+   * hanya sebagai angka yang salah di layar. Pakai UTC_TIMESTAMP() bila
+   * benar-benar harus di dalam SQL.
+   */
   timezone: '+00:00',
   decimalNumbers: true
 });

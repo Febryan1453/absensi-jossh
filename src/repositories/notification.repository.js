@@ -183,14 +183,14 @@ class NotificationRepository {
   }
 
   async markAsRead(id, conn = pool) {
-    const sql = "UPDATE attendance_notifications SET status = 'read', read_at = NOW() WHERE id = ?";
-    const [result] = await conn.execute(sql, [id]);
+    const sql = "UPDATE attendance_notifications SET status = 'read', read_at = ? WHERE id = ?";
+    const [result] = await conn.execute(sql, [new Date(), id]);
     return result.affectedRows > 0;
   }
 
   async markAllAsReadByParent(parentId, conn = pool) {
-    const sql = "UPDATE attendance_notifications SET status = 'read', read_at = NOW() WHERE parent_id = ? AND status != 'read'";
-    const [result] = await conn.execute(sql, [parentId]);
+    const sql = "UPDATE attendance_notifications SET status = 'read', read_at = ? WHERE parent_id = ? AND status != 'read'";
+    const [result] = await conn.execute(sql, [new Date(), parentId]);
     return result.affectedRows;
   }
 }

@@ -123,8 +123,12 @@ class UserRepository {
    * Update last login timestamp
    */
   async updateLastLogin(id, conn = pool) {
-    const sql = 'UPDATE users SET last_login_at = NOW() WHERE id = ?';
-    const [result] = await conn.execute(sql, [id]);
+    // Lihat catatan konvensi waktu di config/database.js: koneksi memakai
+    // timezone '+00:00', jadi waktu ditulis sebagai objek Date agar mysql2
+    // yang mengubahnya ke UTC. NOW() akan menulis jam lokal server dan
+    // membuat nilainya terbaca tujuh jam di masa depan.
+    const sql = 'UPDATE users SET last_login_at = ? WHERE id = ?';
+    const [result] = await conn.execute(sql, [new Date(), id]);
     return result.affectedRows > 0;
   }
 

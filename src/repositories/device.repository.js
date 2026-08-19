@@ -134,8 +134,10 @@ class DeviceRepository {
   }
 
   async updateLastSeen(id, conn = pool) {
-    const sql = 'UPDATE attendance_devices SET last_seen_at = NOW() WHERE id = ?';
-    const [result] = await conn.execute(sql, [id]);
+    // Waktu ditulis sebagai Date, bukan NOW(); lihat catatan yang sama di
+    // user.repository.updateLastLogin.
+    const sql = 'UPDATE attendance_devices SET last_seen_at = ? WHERE id = ?';
+    const [result] = await conn.execute(sql, [new Date(), id]);
     return result.affectedRows > 0;
   }
 
