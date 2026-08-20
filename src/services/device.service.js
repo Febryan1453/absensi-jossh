@@ -2,6 +2,8 @@ const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const deviceRepository = require('../repositories/device.repository');
 const attendanceEventRepository = require('../repositories/attendanceEvent.repository');
+const schoolSessionRepository = require('../repositories/schoolSession.repository');
+const studentRepository = require('../repositories/student.repository');
 const { NotFoundError, ConflictError, BadRequestError } = require('../utils/appError');
 
 /**
@@ -165,6 +167,41 @@ class DeviceService {
 
     await deviceRepository.delete(id);
     return true;
+  }
+
+  /**
+   * Everything a gate tablet needs to run on its own, keyed by the device
+   * credential instead of a member of staff.
+   *
+   * The tablet used to assemble this from /school-sessions/active and
+   * /students, both of which require a user token — so a device screwed to a
+   * corridor wall had to keep a staff session alive indefinitely just to
+   * refresh its student list, and whoever picked the tablet up held that
+   * account. A gate already proves who it is with its own key; it should never
+   * have needed a person's.
+   *
+   * The payload is deliberately the minimum that lets a card be recognised at
+   * the gate: no addresses, no phone numbers, no guardians. A tablet in a
+   * public corridor is the last place a full student record belongs.
+   */
+  async bootstrap(device) {
+    const [session, students] = await Promise.all([
+      schoolSessionRepository.findActive(),
+      studentRepository.findAll({ status: 'active', limit: 5000, offset: 0 })
+    ]);
+
+    return {
+      device: { id: device.id, code: device.code, name: device.name },
+      session: session || null,
+      students: (students || []).map((s) => ({
+        id: s.id,
+        nis: s.nis,
+        name: s.name,
+        class_name: s.class_name,
+        photo: s.photo || null
+      })),
+      server_time: new Date().toISOString()
+    };
   }
 
   async ping(id) {

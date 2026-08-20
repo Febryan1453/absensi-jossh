@@ -31,7 +31,12 @@ class TeacherAttendanceController {
 
       const payload = {
         ...req.body,
-        device_id: req.body.device_id || (req.device ? req.device.id : null)
+        // Perangkat yang MEMBUKTIKAN dirinya lewat kunci selalu menang atas
+        // device_id yang sekadar disebut di badan permintaan. Urutan lama
+        // membiarkan tablet gerbang belakang mencatat absensi atas nama
+        // gerbang utama hanya dengan menuliskannya, dan tidak ada satu pun
+        // kolom yang menyimpan gerbang mana yang sebenarnya memindai.
+        device_id: req.device ? req.device.id : req.body.device_id || null
       };
 
       const result = await teacherAttendanceService.checkIn(payload, context);
@@ -52,7 +57,12 @@ class TeacherAttendanceController {
 
       const payload = {
         ...req.body,
-        device_id: req.body.device_id || (req.device ? req.device.id : null)
+        // Perangkat yang MEMBUKTIKAN dirinya lewat kunci selalu menang atas
+        // device_id yang sekadar disebut di badan permintaan. Urutan lama
+        // membiarkan tablet gerbang belakang mencatat absensi atas nama
+        // gerbang utama hanya dengan menuliskannya, dan tidak ada satu pun
+        // kolom yang menyimpan gerbang mana yang sebenarnya memindai.
+        device_id: req.device ? req.device.id : req.body.device_id || null
       };
 
       const result = await teacherAttendanceService.checkOut(payload, context);

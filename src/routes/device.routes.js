@@ -14,6 +14,12 @@ const router = express.Router();
 // Device heartbeat ping (supports device auth header or JWT)
 router.post('/:id/ping', authenticateDevice, deviceController.ping);
 
+// Gate bootstrap. Mounted above the admin guard because it authenticates the
+// DEVICE, not a person — that is the whole point: a tablet on a wall should
+// not need anybody's account to know today's school hours and which cards
+// belong to which student.
+router.get('/me/bootstrap', authenticateDevice, deviceController.bootstrap);
+
 // Admin device management
 router.use(authenticateToken);
 router.use(requireRole('admin'));
